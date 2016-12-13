@@ -31,8 +31,6 @@ class Driver(View):
         # Get session from session cache Sessions.get_session(request,ussd)
         session = get_or_set_session(at_ussd, self.start_app)
         session.input_all(at_ussd)
-        print session.text
-        print at_ussd.text
 
         result = at_ussd.send( session.render() , session.has_next)
         if session.has_next is False:

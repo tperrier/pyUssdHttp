@@ -52,7 +52,7 @@ angular.module('ussdClient',[]).controller('MainController',['$scope','$http', f
 
     post:function(){
       console.log('Posting',$scope.data);
-      $http.post($scope.submitURL,$scope.data,{responseType:'json'}).then(function(response){
+      $http.post(window.location.href,$scope.data,{responseType:'json'}).then(function(response){
         console.log('Post Response',response);
         $scope.response = response.data.text;
         if(response.data.action.toLowerCase() !== 'con') {
@@ -61,8 +61,6 @@ angular.module('ussdClient',[]).controller('MainController',['$scope','$http', f
         }
       });
     },
-
-    submitURL:window.location.origin + '/ussd/',
 
     keypress:function(evt) {
       if (evt.key == 'Enter') {

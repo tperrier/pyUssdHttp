@@ -55,6 +55,9 @@ class AfricasTalkingUssd(UssdHttpBase):
         if self.phone_number.startswith('+254'):
             self.phone_number = '0' + self.phone_number[4:]
 
+    def __str__(self):
+        return "{0.service_code} on {0.phone_number} id {0.session_id}".format(self)
+
     @abc.abstractmethod
     def response(self,prefix,text):
         pass
