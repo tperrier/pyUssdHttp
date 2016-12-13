@@ -1,0 +1,73 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+    <script src="../static/app/app.js"></script>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="../static/app/style.css"/>
+
+    <title>Africa's Talking Test Client</title>
+  </head>
+
+  <body ng-app="ussdClient" ng-controller="MainController" class='container'>
+
+      <div class="row">
+          <h1 class="text-center">Local testing of Africa's Talking USSD service</h1>
+      </div>
+
+      <div class="row">
+        <div ng-show="session=='start'" class="col-sm-8 col-sm-offset-2">
+            <form>
+              <div class="form-group">
+                <label>URL</label>
+                <input class="form-control" type="text" ng-model="data.url"/>
+              </div>
+              <div class="form-group">
+                <label>USSD Service Code</label>
+                <input class="form-control" type="text" ng-model="data.serviceCode"/>
+              </div>
+              <div class="form-group">
+                <label>From Phone Number</label>
+                <input class="form-control" type="text" ng-model="data.phoneNumber"/>
+              </div>
+              <div class="form-group">
+                <label>Session ID</label>
+                <input class="form-control" type="text" ng-model="data.sessionId"/>
+              </div>
+              <div class="form-group">
+                <label>Extra Text</label>
+                <input class="form-control" type="text" ng-model="data.text"/>
+              </div>
+              <label class="btn btn-primary form-control" ng-click="call()">Call</label>
+            </form>
+        </div>
+
+        <div ng-hide="session=='start'" class="col-sm-8 col-sm-offset-2">
+              <div class="text-center">
+                <span ng-bind="data.serviceCode"></span> @ <span ng-bind="data.url"></span>
+                <strong>Phone Number:</strong> <span ng-bind="data.phoneNumber"></span>
+                <strong>Session ID:</strong> <span ng-bind="data.sessionId"></span>
+              </div>
+              <div class="row">
+                <div id="mockDisplay" class="col-sm-6 col-sm-offset-2" ng-bind="response"> </div>
+                <div id="historyDisplay" class="col-sm-4">
+                  <ul>
+                    {% verbatim %}<li ng-repeat="command in input_history track by $index">{{command}}</li>{% endverbatim %}
+                  </ul>
+                </div>
+              </div>
+              <div class="row">
+                <textarea ng-hide="session=='end'" ng-keyup="keypress($event)" class="col-sm-6 col-sm-offset-3 col-md-4 col-md-offfset-4" ng-model="input">
+
+                </textarea>
+                <div class="col-sm-4 col-sm-offset-4">
+                  <label class="btn btn-success" ng-hide="session=='end'"  ng-click="send()">Send</label>
+                  <label class="btn btn-danger" ng-click="end()">End</label>
+                </div>
+              </div>
+        </div>
+      </div>
+  </body>
+</html>

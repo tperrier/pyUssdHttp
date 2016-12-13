@@ -1,3 +1,6 @@
+from importlib import import_module
+from django.conf import settings
+
 import datetime
 import collections
 
@@ -37,19 +40,59 @@ class Session(object):
         self.history.append( ResultNode(next_screen,input) )
         return next_screen
 
+    def input_all(self,ussd,context=None):
+        """ Run all new commands from the ussd object """
+        if len(self) < len(ussd):
+            if len(ussd) > 1:
+                for input in ussd.commands[len(self):-1]:
+                    self.input(input)
+                    self.render()
+                    if not self.has_next:
+                        break
+            if self.has_next:
+                # Run last input with no render if no break or if len(ussd) == 1
+                self.input(ussd.input)
+
+    def delete(self):
+        store = self.get_store()
+        store.delete()
+
+    def save(self):
+        store = self.get_store()
+        store['ussd'] = self
+        store.save()
+
+    def get_store(self):
+        engine = import_module(settings.SESSION_ENGINE)
+        store = engine.SessionStore(self.session_id)
+        return store
+
     @property
     def commands(self):
-        return ( node.input for node in self.history )
+        return [ node.input for node in self.history ]
 
     @property
     def text(self):
-        return '*'.join(self.commands)
+        return '*'.join(self.commands[1:])
+
+    @property
+    def age(self):
+        td = datetime.datetime.now() - self.created
+        hours , min_seconds = divmod(td.seconds,3600)
+        min , seconds = divmod(min_seconds,60)
+        return "{}d {}h {}m".format(td.days,hours,min)
 
     def __getitem__(self,key):
         try:
             return self.vars[key]
         except KeyError as e:
-            return None
+            try:
+                return getattr(self,key)
+            except AttributeError as e:
+                return None
+
+    def get(self,key,default=None):
+        return self.vars.get(key,default)
 
     def __setitem__(self,key,value):
         self.vars[key] = value
@@ -67,29 +110,6 @@ class Session(object):
         return len(self.history) - 1
 
     def __str__(self):
-        return "<Session: {0.phone_number} on {0.service_code} ({1})>".format(self,len(self))
+        return "<Session: {0.phone_number} on {0.service_code} ({1}) - {2}>".format(self,len(self),self.age)
 
 ResultNode = collections.namedtuple('ResultNode',['next_screen','input'])
-
-class SessionCache(dict):
-
-    def create_session(self,ussd,start_screen):
-        if ussd.session_id in self:
-            return self[ussd.session_id]
-        new_session = Session(start_screen,ussd.session_id,ussd.phone_number,ussd.service_code)
-
-        # Add any initial commands to the session
-        if ussd.input != '':
-            new_session.render() #fake inital render
-            if len(ussd) > 1:
-                for input in ussd.commands[0:-1]:
-                    new_session.input(input)
-                    new_session.render()
-                    if not new_session.has_next:
-                        break
-            if new_session.has_next:
-                # Run last input with no render if no break
-                new_session.input(ussd.input)
-
-        self[ussd.session_id] = new_session
-        return new_session

@@ -2,8 +2,8 @@
 {% if sessions %}
 <h1> Sessions </h1>
 <ul>
-  {% for key , session in sessions.items %}
-  <li> ({{key}}) - {{session}} - {{ session.created }} </li>
+  {% for session in sessions %}
+  <li> ({{session.session_id}}) - {{session}} </li>
   {% endfor %}
 </ul>
 {% else %}

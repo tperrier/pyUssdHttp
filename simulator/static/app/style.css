@@ -1,0 +1,16 @@
+#mockDisplay {
+  height:300px;
+  border: 1px solid black;
+  border-radius: 5px;
+
+  white-space:pre-wrap;
+  font-family:monospace;
+}
+
+#historyDisplay {
+  font-family:monosplace;
+}
+
+#historyDisplay li {
+  margin: 0px;
+}

@@ -72,7 +72,7 @@ class InputScreen(BaseScreen):
         except self.exception_type as e:
             # If validation fails set error message and return self
             session[self.VALIDATION_ERROR] = True
-            session[self.ERROR_MSG] = self.error_msg.format(input=input)
+            session[self.ERROR_MSG] = self.error_msg.format(input=input,error=e)
             return self
         if session[self.VALIDATION_ERROR] is not None:
             del session[self.VALIDATION_ERROR]
@@ -83,7 +83,7 @@ class InputScreen(BaseScreen):
         return self.next_screen if self.next_screen is not None else \
             BaseScreen("Input: {} Validated: {}".format(input,validated_input))
 
-    def validate(self,input):
+    def action(self,input,context):
         # Default clean method
         return input
 
@@ -150,8 +150,9 @@ class QuestionScreen(InputScreen):
     _has_next = True
     name = "question"
 
-    def __init__(self,question="Enter Value",name=None,exception_type=None,error_msg=None,next_screen=None):
-        self.question = question
+    def __init__(self,question=None,name=None,exception_type=None,error_msg=None,next_screen=None):
+        if question is not None:
+            self.question = question
         if name is not None:
             self.name = name
         if exception_type is not None:

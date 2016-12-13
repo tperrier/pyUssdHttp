@@ -20,11 +20,17 @@ class AfricasTalkingUssd(UssdHttpBase):
         self.session_id = post.get('sessionId')
         self.service_code = post.get('serviceCode')
         self.phone_number = post.get('phoneNumber')
-        self.text = post.get('text')
+        self.text = post.get('text','')
+
+        self.clean()
 
         # Get array of all commands sent to far
         self.commands = self.text.split('*')
-        self.input = self.commands[-1]
+        if self.commands == ['']:
+            self.commands = []
+            self.input = ''
+        else:
+            self.input = self.commands[-1]
 
     def send(self,text,has_next=False):
         """ Send a ussd screen over transport """
@@ -41,6 +47,13 @@ class AfricasTalkingUssd(UssdHttpBase):
 
     def __len__(self):
         return len(self.commands)
+
+    def clean(self):
+        self.clean_phone_number()
+
+    def clean_phone_number(self):
+        if self.phone_number.startswith('+254'):
+            self.phone_number = '0' + self.phone_number[4:]
 
     @abc.abstractmethod
     def response(self,prefix,text):
