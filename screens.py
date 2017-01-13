@@ -1,5 +1,5 @@
 import collections
-import utils
+from . import utils
 
 class BaseScreen(object):
 

@@ -10,9 +10,11 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-import UssdHttp
+from ..transports.AfricasTalking import AfricasTalkingUssd
+from .. import sessions
+from .. import utils
 
-class AfricasTalkingUssd(UssdHttp.AfricasTalkingUssd):
+class AfricasTalkingUssd(AfricasTalkingUssd):
 
     def response(self,prefix,text):
         return HttpResponse(u'{0} {1}'.format(prefix,text))
@@ -23,7 +25,7 @@ class Driver(View):
 
     __metaclass__ = abc.ABCMeta
 
-    start_app = UssdHttp.utils.abstract_attribute()
+    start_app = utils.abstract_attribute()
 
     def post(self,request):
         at_ussd = AfricasTalkingUssd(request.POST)
@@ -49,7 +51,7 @@ def get_or_set_session(ussd,start_screen):
         print 'Not Found',store.session_key
         store.save(must_create=True)
         # Create a new session
-        store['ussd'] = UssdHttp.Session(start_screen,ussd.session_id,ussd.phone_number,ussd.service_code)
+        store['ussd'] = sessions.Session(start_screen,ussd.session_id,ussd.phone_number,ussd.service_code)
         if ussd.input != '':
             store['ussd'].render() # Fake initial render
     else:

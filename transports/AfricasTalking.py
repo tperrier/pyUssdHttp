@@ -3,7 +3,7 @@
 import abc
 
 #Local Imports
-from UssdHttp.transports.http import UssdHttpBase
+from .http import UssdHttpBase
 
 class AfricasTalkingUssd(UssdHttpBase):
 

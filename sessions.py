@@ -5,7 +5,7 @@ import datetime
 import collections
 
 # Local Imports
-import screens
+from . import screens
 
 class Session(object):
 

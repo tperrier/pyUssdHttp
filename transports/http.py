@@ -1,6 +1,6 @@
 
 import abc
-from UssdHttp import utils
+from .. import utils
 
 class UssdHttpBase(object):
     """ Base class to define the USSD HTTP Python Object
