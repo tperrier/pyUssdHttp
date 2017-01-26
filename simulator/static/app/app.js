@@ -15,7 +15,7 @@ angular.module('ussdClient',[]).controller('MainController',['$scope','$http', f
     response:"",
     input_history:[],
     data:{
-      url:initial_url_lookup[window.location.hostname] || window.location.origin + '/ussd_app/',
+      url:initial_url_lookup[window.location.hostname] || window.location.origin + '/ussd/app/',
       serviceCode:"*384*1234",
       phoneNumber:"+27470000000",
       sessionId:"AT_____" + Math.floor(Math.random()*999999),
