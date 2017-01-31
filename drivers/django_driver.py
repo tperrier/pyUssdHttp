@@ -20,7 +20,7 @@ class AfricasTalkingUssd(AfricasTalkingUssd):
         return HttpResponse(u'{0} {1}'.format(prefix,text))
 
 @method_decorator(csrf_exempt,name='dispatch')
-class Driver(View):
+class DjangoDriver(View):
     """ Demo USSD Django Driver """
 
     __metaclass__ = abc.ABCMeta
@@ -32,7 +32,7 @@ class Driver(View):
 
         # Get session from session cache Sessions.get_session(request,ussd)
         session = get_or_set_session(at_ussd, self.start_app)
-        session.input_all(at_ussd)
+        session.input_all(at_ussd.commands)
 
         result = at_ussd.send( session.render() , session.has_next)
         if session.has_next is False:

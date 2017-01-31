@@ -4,6 +4,6 @@ import sessions
 import utils
 
 from transports import AfricasTalkingUssd
-from drivers.django_driver import Driver as DjangoDriver
+from drivers import DjangoDriver , TerminalDriver , TestDriver
 
 from sessions import Session

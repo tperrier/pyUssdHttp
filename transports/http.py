@@ -19,6 +19,7 @@ class UssdHttpBase(object):
     session_id = utils.abstract_attribute()
     service_code = utils.abstract_attribute()
     phone_number = utils.abstract_attribute()
+    commands = utils.abstract_attribute()
     input = utils.abstract_attribute()
 
     @abc.abstractmethod
@@ -31,13 +32,31 @@ class UssdHttpBase(object):
         """
         pass
 
-    @abc.abstractmethod
+    def set_commands_and_input(self):
+        """ Split text on * and set input to last command """
+        self.commands = self.text.split('*')
+        if self.commands == ['']:
+            self.commands = []
+            self.input = ''
+        else:
+            self.input = self.commands[-1]
+
     def send(self,text,has_next=False):
-        """ Return text over an HTTP request to send back on the session
+        """ Send USSD screen text to transport """
+        return text
 
-            Arguments:
+    def __len__(self):
+        return len(self.commands)
 
-                text (str): text to send
-                has_next (bool): whether or not to keep the session open
-        """
-        pass
+    def __str__(self):
+        return "{0.service_code} on {0.phone_number} id {0.session_id}".format(self)
+
+class TextTransportUssd(UssdHttpBase):
+
+    def __init__(self,**kwargs):
+
+        self.session_id = kwargs.get('session_id','tmp_000')
+        self.service_code = kwargs.get('service_code','1234')
+        self.phone_number = kwargs.get('phone_number','1234')
+        self.text = kwargs.get('text','')
+        self.set_commands_and_input()
