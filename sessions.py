@@ -40,25 +40,27 @@ class Session(object):
         self.history.append( ResultNode(next_screen,input) )
         return next_screen
 
-    def input_all(self,commands,context=None):
+    def input_all(self,commands,context=None,pos=None):
         """ Run all new commands from the ussd object
             commands (str, or str_list) : command or list of commands to input
             context : dictionary context object to render response with
+            pos (int or None) : position to start commands from. None = len(self)
         """
         if isinstance(commands,basestring):
             commands = commands.split('*')
             if commands == ['']:
                 commands = []
-        if len(self) < len(commands):
-            if len(commands) > 1:
-                for input in commands[len(self):-1]:
-                    self.input(input,context)
-                    self.render()
-                    if not self.has_next:
-                        break
-            if self.has_next:
-                # Run last input with no render if no break or if len(ussd) == 1
-                self.input(commands[-1])
+        window_index = len(self) if pos is None else pos
+        command_window = commands[window_index:]
+        if 1 < len(command_window):
+            for input in command_window[:-1]:
+                self.input(input,context)
+                self.render()
+                if not self.has_next:
+                    break
+        if 0 < len(command_window) and self.has_next:
+            # Run last input with no render if no break or if len(ussd) == 1
+            self.input(command_window[-1])
 
     def delete(self):
         store = self.get_store()

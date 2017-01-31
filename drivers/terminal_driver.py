@@ -25,7 +25,7 @@ class TerminalDriver(object):
         self.input(ussd.commands)
 
     def input(self,commands):
-        self.session.input_all(commands)
+        self.session.input_all(commands,pos=0)
         self.render()
 
     def render(self):
@@ -40,7 +40,7 @@ class TerminalDriver(object):
 class TestDriver(TerminalDriver):
 
     def input(self,commands):
-        self.session.input_all(commands)
+        self.session.input_all(commands,pos=0)
 
     def render(self):
 

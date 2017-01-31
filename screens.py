@@ -113,7 +113,10 @@ class MenuScreen(InputScreen):
 
     def action(self,input,session,context):
         """ Return next menu screen or error message """
-        return self.menu_items[int(input)-1].next_screen
+        index = int(input) - 1
+        if index < 0:
+            raise IndexError('Menu option can not be less than 1')
+        return self.menu_items[index].next_screen
 
     def add_items(self,items):
         if items is None:
