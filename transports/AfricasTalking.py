@@ -25,6 +25,22 @@ class AfricasTalkingUssd(UssdHttpBase):
         self.clean()
         self.set_commands_and_input()
 
+    def send(self,text,has_next=False):
+        """ Send a ussd screen over transport """
+        if has_next:
+            return self.con(text)
+        else:
+            return self.end(text)
+
+    def con(self,text):
+        return self.response('CON',text)
+
+    def end(self,text):
+        return self.response('END',text)
+
+    def response(self,prefix,text):
+        return "{} {}".format(prefix,text)
+
     def clean(self):
         self.clean_phone_number()
 
