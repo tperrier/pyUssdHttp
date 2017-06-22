@@ -7,6 +7,8 @@ import collections
 # Local Imports
 from . import screens
 
+back_key = '99'
+
 class Session(object):
 
     def __init__(self,start_screen,session_id,phone_number,service_code=""):
@@ -35,10 +37,18 @@ class Session(object):
         return self.current_screen.render(session=self,context=context)
 
     def input(self,input,context=None):
-        """ Send input to current screen and create new history node """
-        next_screen = self.current_screen.input(input,session=self,context=context)
-        self.history.append( ResultNode(next_screen,input) )
-        return next_screen
+        """ Send input to current screen and create new history node
+            If the input is equal to the back key, instead go to the
+            previous history node"""
+        if input == back_key and len(self.history) > 1:
+            del self.history[-1]
+
+            return self.history[-1].next_screen
+
+        else:
+            next_screen = self.current_screen.input(input,session=self,context=context)
+            self.history.append( ResultNode(next_screen,input) )
+            return next_screen
 
     def input_all(self,commands,context=None,pos=None):
         """ Run all new commands from the ussd object
