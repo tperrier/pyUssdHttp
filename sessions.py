@@ -17,6 +17,8 @@ class Session(object):
         self.phone_number = phone_number
         self.service_code = service_code
 
+        self.log = [LogNode(0, start_screen, "")]
+
         self.vars = {}
         self.created = datetime.datetime.now()
 
@@ -40,6 +42,8 @@ class Session(object):
         """ Send input to current screen and create new history node
             If the input is equal to the back key, instead go to the
             previous history node"""
+        self.update_log(input, context)
+
         if input == back_key and len(self.history) > 1:
             del self.history[-1]
 
@@ -71,6 +75,13 @@ class Session(object):
         if 0 < len(command_window) and self.has_next:
             # Run last input with no render if no break or if len(ussd) == 1
             self.input(command_window[-1])
+
+    def update_log(self, input, context):
+        """adds info about the current screen and input to the log.
+           currently, nothing happens with this logged info, but
+           we should be able to store it in a database each time a
+           session ends"""
+        self.log.append(LogNode((datetime.datetime.now() - self.created), self.current_screen, input))
 
     def delete(self):
         store = self.get_store()
@@ -132,3 +143,11 @@ class Session(object):
         return "<Session: {0.phone_number} on {0.service_code} ({1}) - {2}>".format(self,len(self),self.age)
 
 ResultNode = collections.namedtuple('ResultNode',['next_screen','input'])
+
+# an element of the log of actions taken in a session
+LogNode = collections.namedtuple("LogNode", ['time_from_start', 'current_screen', 'input'])
+
+
+
+
+
