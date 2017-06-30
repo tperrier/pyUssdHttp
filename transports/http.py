@@ -22,14 +22,18 @@ class UssdHttpBase(object):
     commands = utils.abstract_attribute()
     input = utils.abstract_attribute()
 
-    @abc.abstractmethod
-    def __init__(self,http_post):
-        """ Create a USSD ojbect from HTTTP Post request
+    def __init__(self,session_id,service_code,phone_number,text):
+        """ Create a USSD ojbect from variables from an HTTP session"""
+        self.session_id = session_id
+        self.service_code = service_code
+        self.phone_number = phone_number
+        self.text = text
 
-            Arguments:
+        self.clean()
+        self.set_commands_and_input()
 
-                http_post (dict): map of HTTP Post variables
-        """
+    def clean(self):
+        """ Overide this function to clean data on creation """
         pass
 
     def set_commands_and_input(self):
@@ -41,9 +45,10 @@ class UssdHttpBase(object):
         else:
             self.input = self.commands[-1]
 
+    @abc.abstractmethod
     def send(self,text,has_next=False):
-        """ Send USSD screen text to transport """
-        return text
+        """ Send a ussd screen over transport """
+        pass
 
     def __len__(self):
         return len(self.commands)

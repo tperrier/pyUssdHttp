@@ -10,14 +10,43 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-from ..transports.AfricasTalking import AfricasTalkingUssd
+from .. import transports
 from .. import sessions
 from .. import utils
 
-class AfricasTalkingUssd(AfricasTalkingUssd):
+class AfricasTalkingDjango(transports.AfricasTalkingUssd):
 
     def response(self,prefix,text):
-        return HttpResponse(u'{0} {1}'.format(prefix,text))
+        return HttpResponse( super(AfricasTalkingDjango,self).response(prefix,text) )
+
+    @classmethod
+    def from_request(cls,request):
+        return cls(
+            session_id = request.POST.get('sessionId'),
+            service_code = request.POST.get('serviceCode'),
+            phone_number = request.POST.get('phoneNumber'),
+            text = request.POST.get('text','')
+        )
+
+class NiafikraDjango(transports.NiafikraUssd):
+
+    def send(self,text,has_next=False):
+        """ Create an HttpResponse and add the C or Q Session header """
+        response = HttpResponse( text )
+        if has_next is True:
+            response['Session'] = 'C'
+        else:
+            response['Session'] = 'Q'
+        return response
+
+    @classmethod
+    def from_request(cls,request):
+        return cls(
+            session_id = request.GET.get('sessionid'),
+            service_code = '111',
+            phone_number = request.GET.get('msisdn'),
+            text = request.GET.get('input','')
+        )
 
 @method_decorator(csrf_exempt,name='dispatch')
 class DjangoDriver(View):
@@ -26,15 +55,21 @@ class DjangoDriver(View):
     __metaclass__ = abc.ABCMeta
 
     start_app = utils.abstract_attribute()
+    transport = "AfricasTalking"
+
+    def __init__(self, **kwargs):
+        super(DjangoDriver,self).__init__(**kwargs)
+
+        self.transport_class = get_transport_class(self.transport)
 
     def post(self,request):
-        at_ussd = AfricasTalkingUssd(request.POST)
+        ussd = self.transport_class.from_request(request)
 
         # Get session from session cache Sessions.get_session(request,ussd)
-        session = get_or_set_session(at_ussd, self.start_app)
-        session.input_all(at_ussd.commands)
+        session = get_or_set_session(ussd, self.start_app)
+        session.input_all(ussd.commands)
 
-        result = at_ussd.send( session.render() , session.has_next)
+        result = ussd.send( session.render() , session.has_next)
         if session.has_next is False:
             # Remove from session cache
             session.delete()
@@ -42,16 +77,24 @@ class DjangoDriver(View):
             session.save()
         return result
 
+    def get(self,request):
+        return self.post(request)
+
+def get_transport_class(name):
+    return globals().get("{}Django".format(name), AfricasTalkingDjango )
+
 def get_or_set_session(ussd,start_screen):
     """ Factory method to get or set session in SESSION_ENGINE """
 
+    print ussd
     engine = import_module(settings.SESSION_ENGINE)
-    store = engine.SessionStore(ussd.session_id)
-    if not store.exists(ussd.session_id):
-        print 'Not Found',store.session_key
+    store = engine.SessionStore(session_key=ussd.session_id)
+    if not store.exists(session_key=ussd.session_id):
+        print 'Not Found',store.session_key , ussd.session_id
         store.save(must_create=True)
         # Create a new session
         store['ussd'] = sessions.Session(start_screen,ussd.session_id,ussd.phone_number,ussd.service_code)
+        print store['ussd']
         if ussd.input != '':
             store['ussd'].render() # Fake initial render
     else:

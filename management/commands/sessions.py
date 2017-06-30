@@ -4,20 +4,17 @@ from importlib import import_module
 from django.core.management.base import BaseCommand, CommandError
 from django.conf import settings
 
-# Local Imports
-from uwpesa import models as uwpesa
-
 
 class Command(BaseCommand):
-    help = 'List and manage uwpesa django db sessions'
+    help = 'List and manage ussd django db sessions'
 
     def add_arguments(self, parser):
         subparsers = parser.add_subparsers(help='session commands')
 
-        list_parser = subparsers.add_parser('list', cmd=parser.cmd, help='list uwpesa sessions')
+        list_parser = subparsers.add_parser('list', cmd=parser.cmd, help='list ussd sessions')
         list_parser.set_defaults(action='list_sessions')
 
-        clear_parser = subparsers.add_parser('clear', cmd=parser.cmd, help='delete uwpesa sessions')
+        clear_parser = subparsers.add_parser('clear', cmd=parser.cmd, help='delete ussd sessions')
         clear_parser.set_defaults(action='clear_sessions')
 
     def handle(self, *args, **options):
