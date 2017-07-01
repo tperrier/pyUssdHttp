@@ -41,11 +41,15 @@ class NiafikraDjango(transports.NiafikraUssd):
 
     @classmethod
     def from_request(cls,request):
+        text = request.GET.get('input','')
+        if text.startswith(settings.NIAFIKRA_SERVICE_CODE):
+            # First time creating this session
+            text = text[len(settings.NIAFIKRA_SERVICE_CODE):].lstrip('*')
         return cls(
             session_id = request.GET.get('sessionid'),
-            service_code = '111',
+            service_code = settings.NIAFIKRA_SERVICE_CODE,
             phone_number = request.GET.get('msisdn'),
-            text = request.GET.get('input','')
+            text = text
         )
 
 @method_decorator(csrf_exempt,name='dispatch')
