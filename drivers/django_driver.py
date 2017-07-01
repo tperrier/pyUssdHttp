@@ -44,7 +44,7 @@ class NiafikraDjango(transports.NiafikraUssd):
         text = request.GET.get('input','')
         if text.startswith(settings.NIAFIKRA_SERVICE_CODE):
             # First time creating this session
-            text = text[len(settings.NIAFIKRA_SERVICE_CODE):].lstrip('*')
+            text = text[len(settings.NIAFIKRA_SERVICE_CODE):].lstrip('*#')
         return cls(
             session_id = request.GET.get('sessionid'),
             service_code = settings.NIAFIKRA_SERVICE_CODE,
