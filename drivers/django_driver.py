@@ -30,6 +30,8 @@ class AfricasTalkingDjango(transports.AfricasTalkingUssd):
 
 class NiafikraDjango(transports.NiafikraUssd):
 
+    SERVICE_CODE = getattr(settings,'NIAFIKRA_SERVICE_CODE','')
+
     def send(self,text,has_next=False):
         """ Create an HttpResponse and add the C or Q Session header """
         response = HttpResponse( text )
@@ -42,14 +44,14 @@ class NiafikraDjango(transports.NiafikraUssd):
     @classmethod
     def from_request(cls,request):
         text = request.GET.get('input','')
-        if text.startswith(settings.NIAFIKRA_SERVICE_CODE):
+        if text.startswith(cls.SERVICE_CODE):
             # First time creating this session
-            text = text[len(settings.NIAFIKRA_SERVICE_CODE):].lstrip('*#')
+            text = text[len(cls.SERVICE_CODE):].lstrip('*#')
         return cls(
             session_id = request.GET.get('sessionid'),
-            service_code = settings.NIAFIKRA_SERVICE_CODE,
+            service_code = cls.SERVICE_CODE,
             phone_number = request.GET.get('msisdn'),
-            text = text
+            text = text.split('*')[-1]
         )
 
 @method_decorator(csrf_exempt,name='dispatch')
@@ -71,7 +73,7 @@ class DjangoDriver(View):
 
         # Get session from session cache Sessions.get_session(request,ussd)
         session = get_or_set_session(ussd, self.start_app)
-        session.input_all(ussd.commands)
+        session.input_all(ussd.commands,append=self.transport_class.INPUT_APPEND)
 
         result = ussd.send( session.render() , session.has_next)
         if session.has_next is False:

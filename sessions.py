@@ -54,18 +54,22 @@ class Session(object):
             self.history.append( ResultNode(next_screen,input) )
             return next_screen
 
-    def input_all(self,commands,context=None,pos=None):
+    def input_all(self,commands,context=None,pos=None,append=False):
         """ Run all new commands from the ussd object
-            commands (str, or str_list) : command or list of commands to input
-            context : dictionary context object to render response with
-            pos (int or None) : position to start commands from. None = len(self)
+                commands (str, or str_list) : command or list of commands to input
+                context : dictionary context object to render response with
+                pos (int or None) : position to start commands from. None = len(self)
+                append (bool False) : flag set to False if commands includes past commands appended
         """
         if isinstance(commands,basestring):
             commands = commands.split('*')
             if commands == ['']:
                 commands = []
-        window_index = len(self) if pos is None else pos
-        command_window = commands[window_index:]
+        if append is True:
+            window_index = len(self) if pos is None else pos
+            command_window = commands[window_index:]
+        else:
+            command_window = commands
         if 1 < len(command_window):
             for input in command_window[:-1]:
                 self.input(input,context)
@@ -146,8 +150,3 @@ ResultNode = collections.namedtuple('ResultNode',['next_screen','input'])
 
 # an element of the log of actions taken in a session
 LogNode = collections.namedtuple("LogNode", ['time_from_start', 'current_screen', 'input'])
-
-
-
-
-

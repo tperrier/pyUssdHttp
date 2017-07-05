@@ -22,6 +22,8 @@ class UssdHttpBase(object):
     commands = utils.abstract_attribute()
     input = utils.abstract_attribute()
 
+    INPUT_APPEND = True
+
     def __init__(self,session_id,service_code,phone_number,text):
         """ Create a USSD ojbect from variables from an HTTP session"""
         self.session_id = session_id
