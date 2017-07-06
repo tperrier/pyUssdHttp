@@ -6,6 +6,7 @@ import collections
 
 # Local Imports
 from . import screens
+from . import log
 
 back_key = '99'
 
@@ -88,6 +89,8 @@ class Session(object):
         self.log.append(LogNode((datetime.datetime.now() - self.created), self.current_screen, input))
 
     def delete(self):
+        """ called when a session is finished, ie when has_next==false """
+        log.save_log(self.session_id, self.log)
         store = self.get_store()
         store.delete()
 
