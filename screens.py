@@ -157,7 +157,7 @@ class LongMenuScreen(MenuScreen):
         self.menu_items = []
 
         # can fit all items on one screen
-        if len(items) < self.menu_length:
+        if len(items) <= self.menu_length:
             self.add_items(items)
 
         # too many items to fit on one screen
