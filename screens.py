@@ -163,8 +163,10 @@ class LongMenuScreen(MenuScreen):
         # too many items to fit on one screen
         else:
             self.add_items(items[:self.menu_length])
-            overflow_item = MenuItem('next, 99 back',
+            overflow_item = MenuItem('next  99. back',
                                  LongMenuScreen(title, items[self.menu_length:]))
+            #TODO: Ideally, this would not have 99 hardcoded, would instead
+            # pull from sessions.back_key
 
             self.menu_items.append(overflow_item)
 
