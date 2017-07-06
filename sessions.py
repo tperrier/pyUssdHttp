@@ -90,7 +90,7 @@ class Session(object):
 
     def delete(self):
         """ called when a session is finished, ie when has_next==false """
-        log.save_log(self.session_id, self.created, self.phone_number, self.log)
+        logs.save_log(self.session_id, self.created, self.phone_number, self.log)
         store = self.get_store()
         store.delete()
 
