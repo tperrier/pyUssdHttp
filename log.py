@@ -6,7 +6,7 @@ import collections
 # set this to False to ignore logging
 write_to_log = True
 
-LogNode = collections.namedtuple("LogNode", ['time_from_start', 'current_screen', 'input'])
+# LogNode = collections.namedtuple("LogNode", ['time_from_start', 'current_screen', 'input'])
 
 base_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), os.pardir)
 
@@ -27,6 +27,8 @@ def save_log(session_id, created, phone_number, log):
 			logfile.write('session ID: {} from {} created {}\n'.format(
 											session_id, phone_number, created))
 
+			logfile.write('--------------------------------------------\n')
+			logfile.write('Time to input, screen viewed, input entered.\n')
 			for node in log:
 				logfile.write(make_line(node))
 
