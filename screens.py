@@ -1,6 +1,7 @@
 import collections
 from . import utils
 
+
 class BaseScreen(object):
 
     body = "None"
@@ -147,6 +148,26 @@ class MenuItem(object):
 
     def __str__(self):
         return self.label
+
+class LongMenuScreen(MenuScreen):
+    menu_length = 5
+
+    def __init__(self, title="Select One", items=None):
+        self.title_str = title
+        self.menu_items = []
+
+        # can fit all items on one screen
+        if len(items) < menu_length:
+            self.add_items(items)
+
+        # too many items to fit on one screen
+        else:
+            self.add_items(items[:self.menu_length])
+            overflow_item = MenuItem('next, 99 back',
+                                 LongMenuScreen(title, items[menu_length:]))
+
+            self.add_items(overflow_item)
+
 
 class QuestionScreen(InputScreen):
 
