@@ -6,7 +6,7 @@ import collections
 
 # Local Imports
 from . import screens
-from . import log
+from . import logs
 
 back_key = '99'
 
