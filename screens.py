@@ -36,6 +36,11 @@ class BaseScreen(object):
     def get_next_screen(self):
         return self.next_screen
 
+    def note(self):
+        ''' this is added to the log when this screen is displayed'''
+        if body == 'None': return self.__name__
+        else: return body
+
     ########################################
     # Static Factory Methods
     ########################################
@@ -132,6 +137,10 @@ class MenuScreen(InputScreen):
         if not isinstance(item,MenuItem):
             item = MenuItem(item)
         self.menu_items.append(item)
+
+    def note(self):
+        """ overriding logging notes here"""
+        return self.title_str
 
 class MenuItem(object):
     """ Object representing a menu option label and next_screen if selected """
