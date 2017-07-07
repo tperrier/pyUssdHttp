@@ -39,7 +39,7 @@ class BaseScreen(object):
     def note(self):
         ''' this is added to the log when this screen is displayed'''
         if body == 'None': return self.__name__
-        else: return body
+        else: return self.body
 
     ########################################
     # Static Factory Methods
