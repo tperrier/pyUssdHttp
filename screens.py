@@ -139,7 +139,7 @@ class MenuScreen(InputScreen):
         self.menu_items.append(item)
 
     def note(self):
-        """ overriding logging notes here"""
+        """ overriding logging notes here """
         return self.title_str
 
 class MenuItem(object):
@@ -159,23 +159,36 @@ class MenuItem(object):
         return self.label
 
 class LongMenuScreen(MenuScreen):
-    menu_length = 5
+    """ adds items until 160 chars are taken up, then puts
+        the rest in a submenu titled 'next'. """
+    overflow_str = 'next, 99. back'
 
     def __init__(self, title="Select One", items=None):
         self.title_str = title
         self.menu_items = []
+        self.cutoff_len = 140 # a margin of error here
 
-        # can fit all items on one screen
-        if len(items) <= self.menu_length:
-            self.add_items(items)
+        def current_length():
+            title_len = len(self.title_str) + 4
+            item_len = sum(map(lambda x: len(str(x)), self.menu_items))
+            numeral_len = 4 * len(self.menu_items)
+            return sum((title_len, item_len, numeral_len))
 
-        # too many items to fit on one screen
-        else:
-            self.add_items(items[:self.menu_length])
-            overflow_item = MenuItem('next  99. back',
-                                 LongMenuScreen(title, items[self.menu_length:]))
+
+        i = 0
+        while current_length() < self.cutoff_len-len(self.overflow_str) and i<len(items):
+            # ^ this accounts for the last menu item in calculations
+            #TODO: this logic isn't perfect, as if there's only one more item left,
+            # we can fit it on a single screen if it keeps len < 160 chars
+            self.menu_items.append(MenuItem(items[i]))
+            i +=1
+
+        if i < len(items):
+            overflow_item = MenuItem(self.overflow_str,
+                             LongMenuScreen(title, items[i:]))
             #TODO: Ideally, this would not have 99 hardcoded, would instead
             # pull from sessions.back_key
+            # can't do this the easy way since we'd get a circular import
 
             self.menu_items.append(overflow_item)
 
