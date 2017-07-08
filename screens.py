@@ -1,5 +1,6 @@
 import collections
 from . import utils
+from back import back_button
 
 
 class BaseScreen(object):
@@ -161,9 +162,10 @@ class MenuItem(object):
 class LongMenuScreen(MenuScreen):
     """ adds items until 160 chars are taken up, then puts
         the rest in a submenu titled 'next'. """
-    overflow_str = 'next, 99. back'
+    overflow_str = 'next, {}. back'.format(back_button)
+    back_str = "{}. back".format(back_button)
 
-    def __init__(self, title="Select One", items=None):
+    def __init__(self, title="Select One", items=None, back=False):
         self.title_str = title
         self.menu_items = []
         self.cutoff_len = 140 # a margin of error here
@@ -172,7 +174,8 @@ class LongMenuScreen(MenuScreen):
             title_len = len(self.title_str) + 4
             item_len = sum(map(lambda x: len(str(x)), self.menu_items))
             numeral_len = 4 * len(self.menu_items)
-            return sum((title_len, item_len, numeral_len))
+            back_len = len(self.back_str) if back else 0
+            return sum((title_len, item_len, numeral_len, back_len))
 
 
         i = 0
@@ -183,12 +186,17 @@ class LongMenuScreen(MenuScreen):
             self.menu_items.append(MenuItem(items[i]))
             i +=1
 
-        if i < len(items):
+        if i == len(items):
+            pass
+            # we can fit all on this page, so let's add the back_str if needed
+            #####self.menu_items.append(MenuItem(self.back_str))
+            # this is a bit hacky since it doesn't use the BaseScreen
+            # instead relies on sessions to catch the back key
+
+        else:
+            # we need an overflow page
             overflow_item = MenuItem(self.overflow_str,
                              LongMenuScreen(title, items[i:]))
-            #TODO: Ideally, this would not have 99 hardcoded, would instead
-            # pull from sessions.back_key
-            # can't do this the easy way since we'd get a circular import
 
             self.menu_items.append(overflow_item)
 

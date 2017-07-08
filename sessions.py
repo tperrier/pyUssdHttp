@@ -7,8 +7,8 @@ import collections
 # Local Imports
 from . import screens
 from . import logs
+from back import back_button
 
-back_key = '99'
 
 class Session(object):
 
@@ -45,7 +45,7 @@ class Session(object):
             previous history node"""
         self.update_log(input, context)
 
-        if input == back_key and len(self.history) > 1:
+        if input == back_button and len(self.history) > 1:
             del self.history[-1]
 
             return self.history[-1].next_screen
