@@ -113,7 +113,7 @@ class MenuScreen(InputScreen):
 
     @InputScreen.validate_render
     def render(self,session,context):
-        menu = ["   %s" % self.title_str]
+        menu = [] if self.title_str == '' else ["   %s" % self.title_str]
         for idx , item in enumerate(self.menu_items):
             menu.append( "%i. %s"%(idx+1,item) )
         return "\n".join(menu)
