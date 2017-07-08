@@ -168,10 +168,12 @@ class LongMenuScreen(MenuScreen):
     overflow_str = 'next, {}. back'.format(back_button)
     back_str = "{}. Back".format(back_button)
 
-    def __init__(self, title="Select One", items=None, show_back=True):
+    def __init__(self, title="Select One", items=None, show_back=True, shift=0):
         self.title_str = title
         self.menu_items = []
         self.cutoff_len = 140 # a margin of error here
+
+        self.shift = shift
 
         def current_length():
             title_len = len(self.title_str) + 4
@@ -199,9 +201,26 @@ class LongMenuScreen(MenuScreen):
         else:
             # we need an overflow page
             overflow_item = MenuItem(self.overflow_str,
-                             LongMenuScreen(title, items[i:]))
+                             LongMenuScreen(title, items[i:], shift=i))
 
             self.menu_items.append(overflow_item)
+
+    @InputScreen.validate_render
+    def render(self,session,context):
+        """ I'm overriding this here so that we can shift the index for subsequent
+            pages."""
+        #TODO: at some point this should actually get implemented, but to do so
+        # would need to convert self.menu_items from list to a dict, where the
+        # keys are the items that should be selected in the menu. 
+        # to do so would need to update MenuItem as well.
+        menu = [] if self.title_str == '' else ["   %s" % self.title_str]
+        for idx , item in enumerate(self.menu_items):
+            if item.hide_index: menu_text = str(item)
+            else:
+                #menu_text = "%i. %s"%(idx + self.shift + 1, item)
+                menu_text = "%i. %s"%(idx + 1, item)
+            menu.append( menu_text )
+        return "\n".join(menu)
 
 
 class QuestionScreen(InputScreen):
