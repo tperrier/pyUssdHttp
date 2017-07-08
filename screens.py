@@ -115,7 +115,8 @@ class MenuScreen(InputScreen):
     def render(self,session,context):
         menu = [] if self.title_str == '' else ["   %s" % self.title_str]
         for idx , item in enumerate(self.menu_items):
-            menu.append( "%i. %s"%(idx+1,item) )
+            menu_text = "%i. %s"%(idx+1,item) if not item.hide_index else str(item)
+            menu.append( menu_text )
         return "\n".join(menu)
 
     def action(self,input,session,context):
@@ -146,7 +147,7 @@ class MenuScreen(InputScreen):
 class MenuItem(object):
     """ Object representing a menu option label and next_screen if selected """
 
-    def __init__(self,label,next_screen=None):
+    def __init__(self,label,next_screen=None, hide_index=False):
         if utils.not_iterable(label):
             self.label = str(label)
             self.next_screen = next_screen if next_screen is not None else BaseScreen.no_next(self.label)
@@ -156,6 +157,8 @@ class MenuItem(object):
             if not isinstance(self.next_screen,BaseScreen):
                 self.next_screen = BaseScreen.no_next(self.next_screen)
 
+        self.hide_index = hide_index
+
     def __str__(self):
         return self.label
 
@@ -163,9 +166,9 @@ class LongMenuScreen(MenuScreen):
     """ adds items until 160 chars are taken up, then puts
         the rest in a submenu titled 'next'. """
     overflow_str = 'next, {}. back'.format(back_button)
-    back_str = "{}. back".format(back_button)
+    back_str = "{}. Back".format(back_button)
 
-    def __init__(self, title="Select One", items=None, back=False):
+    def __init__(self, title="Select One", items=None, show_back=True):
         self.title_str = title
         self.menu_items = []
         self.cutoff_len = 140 # a margin of error here
@@ -174,7 +177,7 @@ class LongMenuScreen(MenuScreen):
             title_len = len(self.title_str) + 4
             item_len = sum(map(lambda x: len(str(x)), self.menu_items))
             numeral_len = 4 * len(self.menu_items)
-            back_len = len(self.back_str) if back else 0
+            back_len = len(self.back_str) if show_back else 0
             return sum((title_len, item_len, numeral_len, back_len))
 
 
@@ -187,11 +190,11 @@ class LongMenuScreen(MenuScreen):
             i +=1
 
         if i == len(items):
-            pass
             # we can fit all on this page, so let's add the back_str if needed
-            #####self.menu_items.append(MenuItem(self.back_str))
-            # this is a bit hacky since it doesn't use the BaseScreen
-            # instead relies on sessions to catch the back key
+            if show_back:
+                self.menu_items.append(MenuItem(self.back_str, hide_index=True))
+                # this is a bit hacky since it doesn't use the BaseScreen
+                # instead relies on sessions to catch the back key
 
         else:
             # we need an overflow page
