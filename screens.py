@@ -236,10 +236,6 @@ class LongMenuScreen(MenuScreen):
             else: return str(idx)
 
         valid_inputs = map(make_index, enumerate(self.menu_items))
-
-        print valid_inputs
-        print input
-
         index = valid_inputs.index(input)
 
         return self.menu_items[index].next_screen
