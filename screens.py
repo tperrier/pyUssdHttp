@@ -1,6 +1,6 @@
 import collections
 from . import utils
-from back import back_button
+from global_keys import back_button, forward_button
 
 
 class BaseScreen(object):
@@ -145,9 +145,10 @@ class MenuScreen(InputScreen):
         return self.title_str
 
 class MenuItem(object):
-    """ Object representing a menu option label and next_screen if selected """
+    """ Object representing a menu option label and next_screen if selected
+        custom_index parameter only supported when used within a LongMenuScreen """
 
-    def __init__(self,label,next_screen=None, hide_index=False):
+    def __init__(self,label,next_screen=None, hide_index=False, custom_index=None):
         if utils.not_iterable(label):
             self.label = str(label)
             self.next_screen = next_screen if next_screen is not None else BaseScreen.no_next(self.label)
@@ -158,6 +159,7 @@ class MenuItem(object):
                 self.next_screen = BaseScreen.no_next(self.next_screen)
 
         self.hide_index = hide_index
+        self.custom_index = custom_index
 
     def __str__(self):
         return self.label
@@ -188,7 +190,7 @@ class LongMenuScreen(MenuScreen):
             # ^ this accounts for the last menu item in calculations
             #TODO: this logic isn't perfect, as if there's only one more item left,
             # we can fit it on a single screen if it keeps len < 160 chars
-            self.menu_items.append(MenuItem(items[i]))
+            self.menu_items.append(MenuItem(items[i], custom_index=i+self.shift+1))
             i +=1
 
         if i == len(items):
@@ -201,14 +203,14 @@ class LongMenuScreen(MenuScreen):
         else:
             # we need an overflow page
             overflow_item = MenuItem(self.overflow_str,
-                             LongMenuScreen(title, items[i:], shift=i))
+                             LongMenuScreen(title, items[i:], shift=i), custom_index=forward_button)
 
             self.menu_items.append(overflow_item)
 
+    
     @InputScreen.validate_render
     def render(self,session,context):
-        """ I'm overriding this here so that we can shift the index for subsequent
-            pages."""
+        """ like render() for MenuScreen, but displays custom_index """
         #TODO: at some point this should actually get implemented, but to do so
         # would need to convert self.menu_items from list to a dict, where the
         # keys are the items that should be selected in the menu. 
@@ -217,10 +219,35 @@ class LongMenuScreen(MenuScreen):
         for idx , item in enumerate(self.menu_items):
             if item.hide_index: menu_text = str(item)
             else:
-                #menu_text = "%i. %s"%(idx + self.shift + 1, item)
-                menu_text = "%i. %s"%(idx + 1, item)
+                menu_text = "%s. %s"%(item.custom_index, item)
             menu.append( menu_text )
         return "\n".join(menu)
+
+
+    def action(self,input,session,context):
+        """ Return next menu screen or error message
+            Interprets input as str and compares to custom_index """
+        #index = int(input) - 1
+        #if index < 0:
+        #    raise IndexError('Menu option can not be less than 1')
+        def make_index(elt):
+            idx, item = elt
+            if item.custom_index is not None: return str(item.custom_index)
+            else: return str(idx)
+
+        valid_inputs = map(make_index, enumerate(self.menu_items))
+
+        print valid_inputs
+        print input
+
+        index = valid_inputs.index(input)
+
+        return self.menu_items[index].next_screen
+
+
+    @property
+    def error_msg(self):
+        return "{input} is not a valid menu item."
 
 
 class QuestionScreen(InputScreen):

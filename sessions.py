@@ -7,7 +7,7 @@ import collections
 # Local Imports
 from . import screens
 from . import logs
-from back import back_button
+from global_keys import back_button
 
 
 class Session(object):
